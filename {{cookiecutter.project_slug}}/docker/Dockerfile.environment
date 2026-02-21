@@ -1,0 +1,128 @@
+# syntax=docker/dockerfile:1
+# Keep this syntax directive! It's used to enable Docker BuildKit
+
+#############################################################
+# PYTHON-BASE
+# A. Sets up all our shared environment variables
+#############################################################
+FROM python:3.8-bullseye as python-base
+
+# A1. Set Up Python & Poetry.
+ENV PYTHONUNBUFFERED=1 \
+    # A11. pip
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100 \
+    # A12. Poetry (https://python-poetry.org/docs/configuration/#using-environment-variables)
+    POETRY_VERSION=1.8.2 \
+    # A13. Make poetry install to this location.
+    POETRY_HOME="/opt/poetry" \
+    # A14. Do not ask any interactive question.
+    POETRY_NO_INTERACTION=1 \
+    # A15. Never create virtual environment automaticly, ONLY use env prepared by us.
+    POETRY_VIRTUALENVS_CREATE=false \
+    # A16. Requirements + virtual environment will live in here.
+    VIRTUAL_ENV="/venv"
+
+# A2. Prepend poetry and venv to path
+ENV PATH="$POETRY_HOME/bin:$VIRTUAL_ENV/bin:$PATH"
+
+# A3. Prepare virtual env
+RUN python -m venv $VIRTUAL_ENV
+
+# A4. Working directory and Python path.
+WORKDIR /app
+ENV PYTHONPATH="/app:$PYTHONPATH"
+
+
+#############################################################
+# BUILDER-BASE
+# B. Build dependencies + create our virtual environment
+#############################################################
+FROM python-base as builder-base
+RUN apt-get update && \
+    apt-get install -y \
+    apt-transport-https \
+    gnupg \
+    ca-certificates \
+    build-essential \
+    git \
+    nano \
+    curl
+
+# B1. Create the SSH directory.
+RUN mkdir -p /root/.ssh
+
+# B11. Take an SSH key as a build argument.
+ARG ssh_prv_key
+ARG ssh_prv_key_sub
+ARG ssh_ml_utils
+
+# B12. Git repo and branch name to checkout
+ARG  git_repository_name
+ARG  git_branch_name
+
+# B2. Populate the private key file. (Here RUN effect all the intended lines)
+RUN echo "$ssh_prv_key" > /root/.ssh/id_ed25519 && \
+    echo "$ssh_prv_key_sub" > /root/.ssh/id_ed25519_sub && \
+    echo "$ssh_ml_utils" > /root/.ssh/id_ed25519_ml_utils && \
+    # B21. Set the required permissions.
+    chmod 600 /root/.ssh/id_ed25519 && \
+    chmod 600 /root/.ssh/id_ed25519_sub && \
+    chmod 600 /root/.ssh/id_ed25519_ml_utils && \
+    # B22. Add github to our list of known hosts for ssh.
+    ssh-keyscan github.com >> /root/.ssh/known_hosts && \
+    # B23. Clone your code that lives in a remote repo to WORKDIR:
+    GIT_SSH_COMMAND="ssh -i /root/.ssh/id_ed25519" git clone git@github.com:nuuday/${git_repository_name}.git && \
+    cd ${git_repository_name}  && \
+    git checkout ${git_branch_name} && \
+    git config --global url."ssh://git@".insteadOf https:// && \
+    # B24. The line below ensures that git submodule command uses the specified SSH key for authentication when connecting to the GitHub repository:
+    GIT_SSH_COMMAND="ssh -i /root/.ssh/id_ed25519_sub"  git submodule update --init --recursive
+
+# B3. Install poetry - respects $POETRY_VERSION & $POETRY_HOME
+# The --mount will mount the buildx cache directory to where Poetry and Pip store their cache so that they can re-use it
+RUN --mount=type=cache,target=/root/.cache \
+    curl -sSL https://install.python-poetry.org | python -
+
+# B4. Init dependencies.
+WORKDIR /app/${git_repository_name}
+COPY poetry.lock pyproject.toml ./
+
+# B5. Install runtime dependencies to $VIRTUAL_ENV
+RUN --mount=type=cache,target=/root/.cache \
+    poetry install --no-root --only main
+
+
+#############################################################
+# DEVELOPMENT
+# C. Image used during development / testing
+#############################################################
+FROM builder-base as development
+WORKDIR /app
+
+# C1. Quicker install as runtime dependencies are already installed.
+RUN --mount=type=cache,target=/root/.cache \
+    poetry install --no-root --with test,lint
+
+EXPOSE 8080
+CMD ["bash"]
+
+
+#############################################################
+# PRODUCTION
+# D. Image used during production
+#############################################################
+FROM python-base as production
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates && \
+    apt-get clean
+
+# Copy in our built poetry + venv
+COPY --from=builder-base $POETRY_HOME $POETRY_HOME
+COPY --from=builder-base $VIRTUAL_ENV $VIRTUAL_ENV
+
+# Init dependencies.
+WORKDIR /app/${git_repository_name}
+COPY poetry.lock pyproject.toml ./

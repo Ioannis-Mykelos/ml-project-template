@@ -1,0 +1,11 @@
+{
+  "full_name": "John Doe",
+  "email": "johndoe@nuuday.dk",
+  "short_name": "{{cookiecutter.email.split('@')[0]}}",
+  "github_username": "nuuday",
+  "project_name": "ML yet another project",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}",
+  "compute_instance_name": "ammat-tooling",
+  "project_short_description": "Amazing stuff going on obviously",
+  "version": "0.1.0"
+}
