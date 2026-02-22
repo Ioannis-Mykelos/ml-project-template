@@ -116,19 +116,29 @@ version [1.0.0]:
 
 After generating your project:
 
-1. **Navigate into the project directory:**
+1. **Post-generation hook runs automatically:**
+   - The template includes a post-generation hook that automatically:
+     - Configures git with your name and email
+     - Initializes a git repository
+     - Creates an initial commit
+     - Sets up the remote origin (if GitHub username and project slug are provided)
+     - Attempts to push to GitHub (will fail gracefully if the repo doesn't exist yet)
+   - **Windows users:** The Python hook (`post_gen_project.py`) will run automatically if Python is installed
+   - **Unix/Linux/macOS users:** The bash hook (`post_gen_project.sh`) will run automatically
+
+2. **Navigate into the project directory:**
    ```bash
    cd your-project-name
    ```
 
-2. **Install dependencies using Poetry:**
+3. **Install dependencies using Poetry:**
    ```bash
    poetry install
    ```
    
    For more information on using Poetry, see [README_poetry.md](README_poetry.md).
 
-3. **Set up pre-commit hooks** (see [Pre-commit Hooks](#pre-commit-hooks) below)
+4. **Set up pre-commit hooks** (see [Pre-commit Hooks](#pre-commit-hooks) below)
 
 ## Pre-commit Hooks
 
