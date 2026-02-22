@@ -41,13 +41,13 @@ For more installation options, see the [official documentation](https://cookiecu
 Generate a project directly from the GitHub repository:
 
 ```bash
-cookiecutter git@github.com:nuuday/ml-project-template.git
+cookiecutter git@github.com:Ioannis-Mykelos/ml-project-template.git
 ```
 
 To use a specific branch:
 
 ```bash
-cookiecutter git@github.com:nuuday/ml-project-template.git --checkout dev
+cookiecutter git@github.com:Ioannis-Mykelos/ml-project-template.git --checkout dev
 ```
 
 ### Option 2: Use Local Clone
