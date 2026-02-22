@@ -40,21 +40,9 @@ Thumbs.db
 
 # Notebooks and checkpoints #
 #############################
-*.ipynb
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*.ipynb
+notebooks/
 
 # Data and model files #
 ########################
-*.csv
-*.parquet
-*.pkl
+data/
 
-# Config files #
-################
-config.json
-
-# Azure Machine Learning Studio auto generated files #
-################
-.amlignore
-.amlignore.amltmp
