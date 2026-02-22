@@ -1,5 +1,6 @@
 """a first file for testing"""
 
+import pandas as pd
 import pytest
 from conftest import sample_data
 
