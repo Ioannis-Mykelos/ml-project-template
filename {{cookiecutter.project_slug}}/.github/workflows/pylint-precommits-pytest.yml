@@ -5,7 +5,7 @@ on:
 
 jobs:
   pylint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Run pylint
 
     steps:
@@ -15,7 +15,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.12"
 
       - name: Upgrade pip
         run: pip install --upgrade pip
@@ -61,7 +61,7 @@ jobs:
         run: exit 1
 
   precommits:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Run precommits
     needs: pylint
 
@@ -72,7 +72,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.12"
 
       - name: Upgrade pip
         run: pip install --upgrade pip
@@ -106,7 +106,7 @@ jobs:
         run: exit 1
 
   pytest:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Run pytest
     needs: [pylint, precommits]
 
@@ -117,7 +117,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.12"
 
       - name: Upgrade pip
         run: pip install --upgrade pip

@@ -6,19 +6,14 @@ git config --global init.defaultBranch main
 git config --global --add --bool push.autoSetupRemote true
 
 
-path="/mnt/batch/tasks/shared/LS_root/mounts/clusters/"
-path+="{{cookiecutter.compute_instance_name}}"
-path+="/code/Users/"
-path+="{{cookiecutter.short_name}}"
-path+="/"
-path+="{{cookiecutter.project_slug}}"
+# Get the absolute path of the directory where the script is currently running
+PROJECT_DIR=$(pwd)
 
-echo $path
-git config --global --add safe.directory $path
+echo "Setting safe directory for: $PROJECT_DIR"
+git config --global --add safe.directory "$PROJECT_DIR"
 git init
 git add .
 git commit -m "first commit"
 git branch -M main
 git remote add origin git@github.com:{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}.git
 git push -u origin main
-
