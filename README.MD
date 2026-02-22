@@ -1,82 +1,182 @@
-# How to use cookiecutter with  **ml-project-template**
+# ML Project Template
 
-## 1 ) Make sure you have cookiecutter installed :
+A cookiecutter template for creating standardized machine learning projects with best practices, pre-configured tooling, and a clean project structure.
 
-- Depending on what you use there are different ways, some popular ones are :
-```
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Project Setup](#project-setup)
+- [Pre-commit Hooks](#pre-commit-hooks)
+- [Additional Resources](#additional-resources)
+
+## Prerequisites
+
+### Install Cookiecutter
+
+Cookiecutter is required to generate projects from this template. Install it using one of the following methods:
+
+**Using pip:**
+```bash
 pip install cookiecutter
 ```
-```
+
+**Using Homebrew (macOS):**
+```bash
 brew install cookiecutter
 ```
-```
+
+**Using Conda:**
+```bash
 conda install cookiecutter
 ```
-- More info can be found here: https://cookiecutter.readthedocs.io/en/1.7.2/installation.html
 
-### If you want to use a local version of **ml-project-template**, clone it to your computer:
+For more installation options, see the [official documentation](https://cookiecutter.readthedocs.io/en/1.7.2/installation.html).
 
+## Installation
+
+### Option 1: Use from GitHub (Recommended)
+
+Generate a project directly from the GitHub repository:
+
+```bash
+cookiecutter git@github.com:nuuday/ml-project-template.git
 ```
+
+To use a specific branch:
+
+```bash
+cookiecutter git@github.com:nuuday/ml-project-template.git --checkout dev
+```
+
+### Option 2: Use Local Clone
+
+If you prefer to work with a local copy of the template:
+
+```bash
 git clone https://github.com/Ioannis-Mykelos/ml-project-template.git
-```
-or if you're using ssh:
-
-```
+# or using SSH:
 git clone git@github.com:Ioannis-Mykelos/ml-project-template.git
 ```
 
-### OBS: If you want the project to be automatically pushed to a repo then create an empty repo, with the same name as the project.
+Then generate a project from the local template:
 
-## 2 ) Generate the project using cookiecutter:
-
-- Open a terminal and travel/navigate to the place where you want to place the project using the command cd
-```
-cd Users/YOUR_EMAIL_PREFIX_NAME/DIRECTORY_YOU_WANT_TO_CREATE_THE_PROJECT
-```
-- You can generate a project with a repo, use the following command:
-```
-cookiecutter git@github.com:nuuday/ml-project-template.git
-```
-and even select a specific branch you want to use :
-```
-cookiecutter git@github.com:nuuday/ml-project-template.git --checkout dev
-```
-- You can also use a local cloned version of the  **ml-project-template** by running the cookiecutter command plus the path to the template so for example if you are in the directory where the folder is you can run :
-```
+```bash
 cookiecutter ml-project-template
 ```
-- If the command worked, you will be prompted to put in the required information **line by line** in the command prompt:
-  - What is written in [ ] is the **default value**, so if you just press **enter** it will take that value.
-  - The first 3 lines are the easiest (**full_name**, **email**, & **short_name**).
-  - For **github_username** press **Enter** if you wish to push to the Nuuday repo, otherwise replace it with your own username.
-  - The **project_name** MUST match the name of the empty repository you created (This is important).
-  - The **project_slug** generates itself from the **project_name** so unless you want different names or something went wrong with naming you can just press enter.
-  - The **project_short_description** and **version** are optional (fill in anything you think is usefull).
-  - **REMINDER**: if you want it to be pushed to a repo you need to match the name of the repo with the **project_slug** and/or **project_name**.
-As a reference you can see the following pictures:
-<br/>
-	<img src=images/cookie1.png width="1100" height="350">
-<br/>
 
+> **Note:** If you want the project to be automatically pushed to a repository, create an empty repository with the same name as your project before generating.
 
+## Usage
 
+### Step 1: Navigate to Your Desired Directory
 
-
-
-
-
-
-## 3 ) How to install pre-commits:
-
-- After the project was generated, clone it down to whatever compute you want to develop on (if it wasn't generated there already). Make sure you have the pre-commit package installed:
+```bash
+cd /path/to/your/projects/directory
 ```
-pip install pre-commit
-```
-- Then install the pre-commit commands that are included in the template by running:
-```
-pre-commit install
-```
-- Now the pre-commits should run automatically everytime something is commited to git. No need to re-install if you make changes to .pre-commit-config.yaml, it will automatically re-install.
 
-- *OBS!*:
-If you need to add the pre-commits to an already existing project, download the `.pre-commit-config.yaml` & `setup.cfg` files into the root directory of the project and then, follow the steps above.
+### Step 2: Generate the Project
+
+Run cookiecutter with the template URL or local path (see [Installation](#installation) above).
+
+### Step 3: Configure Project Parameters
+
+When prompted, provide the following information:
+
+| Parameter | Description | Notes |
+|-----------|-------------|-------|
+| `full_name` | Your full name | Default value shown in brackets `[]` |
+| `email` | Your email address | Default value shown in brackets `[]` |
+| `short_name` | Short name/identifier | Auto-generated from email by default |
+| `github_username` | GitHub username | Press Enter for default organization repo |
+| `project_name` | Project name | **Must match** your empty repository name if pushing to a repo |
+| `project_slug` | URL-friendly project identifier | Auto-generated from `project_name` (press Enter to accept) |
+| `project_short_description` | Brief project description | Optional |
+| `version` | Project version | Optional (default: 1.0.0) |
+
+**Important Notes:**
+- Values in brackets `[]` are defaults - press Enter to accept them
+- If you plan to push to a repository, ensure `project_name` matches the repository name
+- The `project_slug` is automatically generated from `project_name` (lowercase, spaces/hyphens converted)
+
+**Example:**
+```
+full_name [John Doe]: Jane Smith
+email [johndoe@gmail.com]: jane@example.com
+short_name [jane]: 
+github_username [nuuday]: 
+project_name [My Project]: ml-sentiment-analysis
+project_slug [my-project]: 
+project_short_description [Amazing stuff going on]: Sentiment analysis model
+version [1.0.0]: 
+```
+
+## Project Setup
+
+After generating your project:
+
+1. **Navigate into the project directory:**
+   ```bash
+   cd your-project-name
+   ```
+
+2. **Install dependencies using Poetry:**
+   ```bash
+   poetry install
+   ```
+   
+   For more information on using Poetry, see [README_poetry.md](README_poetry.md).
+
+3. **Set up pre-commit hooks** (see [Pre-commit Hooks](#pre-commit-hooks) below)
+
+## Pre-commit Hooks
+
+This template includes pre-configured pre-commit hooks for code quality and consistency.
+
+### Installation
+
+1. **Install pre-commit:**
+   ```bash
+   pip install pre-commit
+   ```
+   Or if using Poetry:
+   ```bash
+   poetry add pre-commit --group dev
+   ```
+
+2. **Install the hooks:**
+   ```bash
+   pre-commit install
+   ```
+
+### What's Included
+
+The pre-commit configuration includes:
+- **Black** - Code formatting
+- **isort** - Import sorting
+- **flake8** - Linting
+- **mypy** - Type checking
+- **Pre-commit hooks** - File checks (YAML, JSON, trailing whitespace, etc.)
+
+### Usage
+
+Pre-commit hooks run automatically on every `git commit`. No need to re-install if you modify `.pre-commit-config.yaml` - changes are automatically applied.
+
+To manually run hooks on all files:
+```bash
+pre-commit run --all-files
+```
+
+### Adding to Existing Projects
+
+To add these pre-commit hooks to an existing project:
+
+1. Copy `.pre-commit-config.yaml` to your project root
+2. Run `pre-commit install` as described above
+
+## Additional Resources
+
+- [Cookiecutter Documentation](https://cookiecutter.readthedocs.io/)
+- [Poetry Documentation](https://python-poetry.org/docs/)
+- [Pre-commit Documentation](https://pre-commit.com/)
