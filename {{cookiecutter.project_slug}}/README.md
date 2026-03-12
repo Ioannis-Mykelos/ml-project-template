@@ -69,7 +69,7 @@ cd {{cookiecutter.project_slug}}
 
 ### 2. Install Dependencies
 
-Using Poetry (recommended):
+Using UV (recommended):
 
 ```bash
 uv venv
