@@ -36,6 +36,10 @@ For more installation options, see the [official documentation](https://cookiecu
 
 ## Installation
 
+> [!NOTE]
+> First step is to create an empty GitHub repository, which you will populate with the cookiecutter.
+> This step is very important. You should create an empty repository with the same name as your project before generating.
+
 ### Option 1: Use from GitHub (Recommended)
 
 Generate a project directly from the GitHub repository:
@@ -66,7 +70,6 @@ Then generate a project from the local template:
 cookiecutter ml-project-template
 ```
 
-> **Note:** If you want the project to be automatically pushed to a repository, create an empty repository with the same name as your project before generating.
 
 ## Usage
 
@@ -79,6 +82,10 @@ cd /path/to/your/projects/directory
 ### Step 2: Generate the Project
 
 Run cookiecutter with the template URL or local path (see [Installation](#installation) above).
+
+```bash
+cookiecutter git@github.com:Ioannis-Mykelos/ml-project-template.git
+```
 
 ### Step 3: Configure Project Parameters
 
@@ -138,22 +145,19 @@ After generating your project:
 
 ## Pre-commit Hooks
 
-This template includes pre-configured pre-commit hooks for code quality and consistency.
+This template includes pre-configured pre-commit hooks for code quality and consistency. The `pre-commit` python package is already installed in the environment
 
 ### Installation
 
-1. **Install pre-commit:**
-   ```bash
-   pip install pre-commit
-   ```
-   Or if using uv:
-   ```bash
-   uv add pre-commit --group dev
-   ```
-
-2. **Install the hooks:**
+1. **Initiate pre-commit - Install the hooks:**
    ```bash
    pre-commit install
+   ```
+   You should see the following `pre-commit installed at .git/hooks/pre-commit`
+
+   Then run all the files
+   ```bash
+   pre-commit run --all-files
    ```
 
 ### What's Included
