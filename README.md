@@ -104,12 +104,12 @@ When prompted, provide the following information:
 ```
 full_name [John Doe]: Jane Smith
 email [johndoe@gmail.com]: jane@example.com
-short_name [jane]: 
-github_username [nuuday]: 
+short_name [jane]:
+github_username [nuuday]:
 project_name [My Project]: ml-sentiment-analysis
-project_slug [my-project]: 
+project_slug [my-project]:
 project_short_description [Amazing stuff going on]: Sentiment analysis model
-version [1.0.0]: 
+version [1.0.0]:
 ```
 
 ## Project Setup
@@ -135,7 +135,7 @@ After generating your project:
    ```bash
    poetry install
    ```
-   
+
    For more information on using Poetry, see [README_poetry.md](README_poetry.md).
 
 4. **Set up pre-commit hooks** (see [Pre-commit Hooks](#pre-commit-hooks) below)

@@ -3,6 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 def run_command(cmd, check=True):
     """Run a shell command and return output if successful."""
     try:
@@ -13,37 +14,39 @@ def run_command(cmd, check=True):
     except subprocess.CalledProcessError:
         return None
 
+
 def get_github_username(fallback):
     """Detect the actual GitHub username from the system."""
     # 1. Try GitHub CLI (The most reliable way)
     gh_user = run_command("gh api user --jq .login")
     if gh_user:
         return gh_user
-    
+
     # 2. Try git config (Commonly used by some tools)
     git_user = run_command("git config --get github.user")
     if git_user:
         return git_user
-    
+
     # 3. Fallback to the cookiecutter variable
     return fallback
 
+
 def main():
     project_dir = Path.cwd()
-    
+
     # Templated variables
     full_name = "{{ cookiecutter.full_name }}"
     email = "{{ cookiecutter.email }}"
     project_slug = "{{ cookiecutter.project_slug }}"
-    
+
     # DETECT REAL USERNAME
     raw_github_username = "{{ cookiecutter.github_username }}"
     github_username = get_github_username(raw_github_username)
-    
-    print(f"\n{'='*60}")
+
+    print(f"\n{'=' * 60}")
     print(f"🚀 Detected GitHub User: {github_username}")
     print(f"📁 Project directory: {project_dir}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     # 1. Init
     run_command("git init", check=False)
@@ -60,16 +63,19 @@ def main():
     # 4. Remote & Push
     remote_url = f"git@github.com:{github_username}/{project_slug}.git"
     print(f"🔗 Setting remote to: {remote_url}")
-    
+
     # Add remote (ignore error if already exists)
-    subprocess.run(f'git remote add origin "{remote_url}"', shell=True, capture_output=True)
-    
+    subprocess.run(
+        f'git remote add origin "{remote_url}"', shell=True, capture_output=True
+    )
+
     if run_command("git push -u origin main", check=False) is not None:
         print("✅ Successfully pushed to GitHub!")
     else:
         print("⚠️  Push failed. Check if the repo exists and your SSH keys are set.")
 
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
+
 
 if __name__ == "__main__":
     main()

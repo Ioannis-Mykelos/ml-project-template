@@ -1,0 +1,169 @@
+name: Running pylint, pre-commits and pytest
+
+on:
+  - pull_request
+
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    name: Run pylint
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
+      - name: Install pylint
+        run: pip install pylint==3.1.0
+
+      - name: Run pylint
+        id: pylint
+        run: |
+          set +e
+          output=$(pylint --fail-under=8 --disable=E0401 --ignore-imports=yes -d duplicate-code $(git ls-files '*.py') > err.log)
+          state=$(echo $?)
+          err_output=$(cat err.log)
+          output="${output}\n${err_output}"
+          delimiter="$(openssl rand -hex 8)"
+          echo "pylint-output<<${delimiter}" >> "${GITHUB_OUTPUT}"
+          echo "$output" >> "${GITHUB_OUTPUT}"
+          echo "${delimiter}" >> "${GITHUB_OUTPUT}"
+          set -e
+          exit $state
+        continue-on-error: True
+
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ "{{" }} secrets.GITHUB_TOKEN {{ "}}" }}
+          script: |
+            const output = `#### Pylint score over 8 \`${{ "{{" }} steps.pylint.outcome {{ "}}" }}\`
+            <details><summary>Show Outputs</summary>
+            ${{ "{{" }} steps.pylint.outputs.pylint-output {{ "}}" }}
+            </details>
+            *Pusher: @${{ "{{" }} github.actor {{ "}}" }}, Action: ${{ "{{" }} github.event_name {{ "}}" }}*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Pylint status
+        if: steps.pylint.outcome == 'failure'
+        run: exit 1
+
+  precommits:
+    runs-on: ubuntu-latest
+    name: Run precommits
+    needs: pylint
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
+      - name: Install pre-commit
+        run: pip install pre-commit==3.5.0
+
+      - name: Run pre-commit hooks
+        id: precommit
+        run: pre-commit run --color=always --show-diff-on-failure --all-files
+        continue-on-error: True
+
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ "{{" }} secrets.GITHUB_TOKEN {{ "}}" }}
+          script: |
+            const output = `#### Run of pre-commits \`${{ "{{" }} steps.precommit.outcome {{ "}}" }}\`
+            If pre-commits fail please re-run them on all your files.\n
+            Use the command : pre-commit run --all-files
+            *Pusher: @${{ "{{" }} github.actor {{ "}}" }}, Action: ${{ "{{" }} github.event_name {{ "}}" }}*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Pre-commit status
+        if: steps.precommit.outcome == 'failure'
+        run: exit 1
+
+  pytest:
+    runs-on: ubuntu-latest
+    name: Run pytest
+    needs: [pylint, precommits]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
+      - name: Install pytest
+        run: pip install pytest==7.4.3
+
+      - name: Run pytest and generate coverage report
+        id: pytest
+        run: |
+          set +e
+          output=$(pytest --junitxml=pytest.xml --tb=short --verbose $(git ls-files 'test/test_*.py')> err.log)
+          state=$(echo $?)
+          err_output=$(cat err.log)
+          output="${output}\n${err_output}"
+          delimiter="$(openssl rand -hex 8)"
+          echo "pytest-output<<${delimiter}" >> "${GITHUB_OUTPUT}"
+          echo "$output" >> "${GITHUB_OUTPUT}"
+          echo "${delimiter}" >> "${GITHUB_OUTPUT}"
+          set -e
+          exit $state
+        continue-on-error: True
+
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          junitxml-path: ./pytest.xml
+          create-new-comment: True
+
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ "{{" }} secrets.GITHUB_TOKEN {{ "}}" }}
+          script: |
+            const output = `#### Run of Pytest \`${{ "{{" }} steps.pytest.outcome {{ "}}" }}\`
+            <details><summary>Show Outputs</summary>
+            ${{ "{{" }} steps.pytest.outputs.pytest-output {{ "}}" }}
+            </details>
+            *Pusher: @${{ "{{" }} github.actor {{ "}}" }}, Action: ${{ "{{" }} github.event_name {{ "}}" }}*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Pytest status
+        if: steps.pytest.outcome == 'failure'
+        run: exit 1
