@@ -20,7 +20,6 @@
 *.rar
 *.tar
 *.zip
-*.env
 
 # Logs and databases #
 ######################
@@ -46,3 +45,7 @@ notebooks/
 ########################
 data/
 
+# Environment variables and virtual environment #
+#################################################
+*.env
+.venv
