@@ -27,31 +27,33 @@ This project is a machine learning pipeline template designed for production-rea
 
 ```
 {{cookiecutter.project_slug}}/
+├── .github/workflows/
+│   └── pylint-precommit-pytest.yaml   # GitHub Actions CI/CD workflows
+├── data/                              # Data files for exploration
+├── notebooks/                         # Jupyter notebooks for exploration
 ├── src/
 │   └── pipelines/
-│       ├── preprocessing.py    # Data preprocessing pipeline
-│       ├── training.py         # Model training pipeline
-│       ├── scoring.py          # Model scoring pipeline
-│       ├── production.py        # Production pipeline
-│       ├── postprocessing.py   # Post-processing pipeline
-│       └── monitoring.py        # Model monitoring pipeline
+│       ├── preprocessing.py           # Data preprocessing pipeline
+│       ├── training.py                # Model training pipeline
+│       ├── scoring.py                 # Model scoring pipeline
+│       ├── production.py              # Production pipeline
+│       ├── postprocessing.py          # Post-processing pipeline
+│       └── monitoring.py              # Model monitoring pipeline
 ├── test/
-│   ├── conftest.py             # Pytest configuration and fixtures
-│   └── test_one.py              # Example test cases
-├── notebooks/                   # Jupyter notebooks for exploration
-├── .github/
-│   └── workflows/               # GitHub Actions CI/CD workflows
-├── .env.example                 # Environment variables template
-├── .gitignore                   # Git ignore rules
-├── .pre-commit-config.yaml      # Pre-commit hooks configuration
-├── pyproject.toml               # Poetry dependencies and project config
-└── README.md                    # This file
+│   ├── conftest.py                    # Pytest configuration and fixtures
+│   └── test_one.py                    # Example test cases
+├── .env.example                       # Environment variables template
+├── .gitignore                         # Git ignore rules
+├── .pre-commit-config.yaml            # Pre-commit hooks configuration
+├── pyproject.toml                     # UV dependencies and project config
+├── README.md                          # This file
+└── uv.lock                            # The uv lock file
 ```
 
 ## Prerequisites
 
 - **Python**: >= 3.12
-- **Poetry**: For dependency management ([Installation Guide](https://python-poetry.org/docs/#installation))
+- **UV**: For dependency management ([Installation Guide](https://docs.astral.sh/uv/getting-started/installation/))
 - **Git**: For version control
 
 ## Installation
@@ -68,27 +70,34 @@ cd {{cookiecutter.project_slug}}
 Using Poetry (recommended):
 
 ```bash
-poetry install
+uv venv
+uv lock
+uv sync
 ```
 
 This will install all project dependencies including development tools.
 
 ### 3. Activate the Virtual Environment
 
+- Navigate to your project file
 ```bash
-poetry shell
+cd YourProjectFile
 ```
 
-Or run commands with:
-
+- For Windows OS:
 ```bash
-poetry run <command>
+source .venv\Scripts\activate
+```
+
+- For MacOS:
+```bash
+source .venv/bin/activate
 ```
 
 ### 4. Set Up Pre-commit Hooks
 
 ```bash
-poetry run pre-commit install
+pre-commit install
 ```
 
 Pre-commit hooks will automatically run on every commit to ensure code quality.
@@ -188,17 +197,17 @@ This project uses several tools to maintain code quality:
 
 ```bash
 # Format code
-poetry run black src/ test/
+uv run black src/ test/
 
 # Sort imports
-poetry run isort src/ test/
+uv run isort src/ test/
 
 # Run linters
-poetry run flake8 src/ test/
-poetry run pylint src/
+uv run flake8 src/ test/
+uv run pylint src/
 
 # Type checking
-poetry run mypy src/
+uv run mypy src/
 ```
 
 ### Pre-commit Hooks
@@ -206,7 +215,7 @@ poetry run mypy src/
 Pre-commit hooks run automatically on commit. To run manually:
 
 ```bash
-poetry run pre-commit run --all-files
+uv run pre-commit run --all-files
 ```
 
 ## Testing
@@ -216,25 +225,25 @@ poetry run pre-commit run --all-files
 Run all tests:
 
 ```bash
-poetry run pytest
+uv run pytest
 ```
 
 Run with verbose output:
 
 ```bash
-poetry run pytest -v
+uv run pytest -v
 ```
 
 Run specific test file:
 
 ```bash
-poetry run pytest test/test_one.py
+uv run pytest test/test_one.py
 ```
 
 Run with coverage:
 
 ```bash
-poetry run pytest --cov=src --cov-report=html
+uv run pytest --cov=src --cov-report=html
 ```
 
 ### Writing Tests
@@ -285,8 +294,8 @@ This project includes GitHub Actions workflows (`.github/workflows/`) for:
 For production deployment:
 
 1. Ensure all environment variables are properly configured
-2. Run tests: `poetry run pytest`
-3. Check code quality: `poetry run pre-commit run --all-files`
+2. Run tests: `uv run pytest`
+3. Check code quality: `uv run pre-commit run --all-files`
 4. Build and deploy according to your deployment strategy
 
 ### Azure ML Integration
@@ -301,8 +310,8 @@ The pipelines are designed to work with Azure Machine Learning. To use Azure ML:
 
 1. Create a feature branch: `git checkout -b feature/your-feature-name`
 2. Make your changes
-3. Ensure tests pass: `poetry run pytest`
-4. Run pre-commit hooks: `poetry run pre-commit run --all-files`
+3. Ensure tests pass: `uv run pytest`
+4. Run pre-commit hooks: `uv run pre-commit run --all-files`
 5. Commit your changes: `git commit -m "Add your feature"`
 6. Push to the branch: `git push origin feature/your-feature-name`
 7. Create a Pull Request
