@@ -28,9 +28,8 @@ dev = [
     "cookiecutter>=2.6.0,<3",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["src*"]
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
 
 [build-system]
 requires = ["hatchling"]
