@@ -9,7 +9,9 @@ A cookiecutter template for creating standardized machine learning projects with
 - [Usage](#usage)
 - [Project Setup](#project-setup)
 - [Pre-commit Hooks](#pre-commit-hooks)
+- [Push to your GitHub Repository](#push-your-local-repository-to-gitgub)
 - [Additional Resources](#additional-resources)
+
 
 ## Prerequisites
 
@@ -185,8 +187,20 @@ To add these pre-commit hooks to an existing project:
 1. Copy `.pre-commit-config.yaml` to your project root
 2. Run `pre-commit install` as described above
 
+## Push your local repository to GitHub
+You can find these commands in the empty GitHub repository you created
+
+```bash
+git commit -m "my first commit"
+git branch -M main
+git remote add origin git@github.com:YOUR-GITHUB-NAME/YOUR-GITHUB-PROJECT-NAME.git
+git push -u origin main
+```
+
 ## Additional Resources
 
 - [Cookiecutter Documentation](https://cookiecutter.readthedocs.io/)
 - [uv Documentation](https://docs.astral.sh/uv/getting-started/)
 - [Pre-commit Documentation](https://pre-commit.com/)
+
+
