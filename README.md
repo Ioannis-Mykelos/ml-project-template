@@ -9,7 +9,9 @@ A cookiecutter template for creating standardized machine learning projects with
 - [Usage](#usage)
 - [Project Setup](#project-setup)
 - [Pre-commit Hooks](#pre-commit-hooks)
+- [Push to your GitHub Repository](#push-your-local-repository-to-gitgub)
 - [Additional Resources](#additional-resources)
+
 
 ## Prerequisites
 
@@ -35,6 +37,10 @@ conda install cookiecutter
 For more installation options, see the [official documentation](https://cookiecutter.readthedocs.io/en/1.7.2/installation.html).
 
 ## Installation
+
+> [!NOTE]
+> First step is to create an empty GitHub repository, which you will populate with the cookiecutter.
+> This step is very important. You should create an empty repository with the same name as your project before generating.
 
 ### Option 1: Use from GitHub (Recommended)
 
@@ -66,7 +72,6 @@ Then generate a project from the local template:
 cookiecutter ml-project-template
 ```
 
-> **Note:** If you want the project to be automatically pushed to a repository, create an empty repository with the same name as your project before generating.
 
 ## Usage
 
@@ -79,6 +84,10 @@ cd /path/to/your/projects/directory
 ### Step 2: Generate the Project
 
 Run cookiecutter with the template URL or local path (see [Installation](#installation) above).
+
+```bash
+cookiecutter git@github.com:Ioannis-Mykelos/ml-project-template.git
+```
 
 ### Step 3: Configure Project Parameters
 
@@ -138,22 +147,19 @@ After generating your project:
 
 ## Pre-commit Hooks
 
-This template includes pre-configured pre-commit hooks for code quality and consistency.
+This template includes pre-configured pre-commit hooks for code quality and consistency. The `pre-commit` python package is already installed in the environment
 
 ### Installation
 
-1. **Install pre-commit:**
-   ```bash
-   pip install pre-commit
-   ```
-   Or if using uv:
-   ```bash
-   uv add pre-commit --group dev
-   ```
-
-2. **Install the hooks:**
+1. **Initiate pre-commit - Install the hooks:**
    ```bash
    pre-commit install
+   ```
+   You should see the following `pre-commit installed at .git/hooks/pre-commit`
+
+   Then run all the files
+   ```bash
+   pre-commit run --all-files
    ```
 
 ### What's Included
@@ -181,8 +187,20 @@ To add these pre-commit hooks to an existing project:
 1. Copy `.pre-commit-config.yaml` to your project root
 2. Run `pre-commit install` as described above
 
+## Push your local repository to GitHub
+You can find these commands in the empty GitHub repository you created
+
+```bash
+git commit -m "my first commit"
+git branch -M main
+git remote add origin git@github.com:YOUR-GITHUB-NAME/YOUR-GITHUB-PROJECT-NAME.git
+git push -u origin main
+```
+
 ## Additional Resources
 
 - [Cookiecutter Documentation](https://cookiecutter.readthedocs.io/)
 - [uv Documentation](https://docs.astral.sh/uv/getting-started/)
 - [Pre-commit Documentation](https://pre-commit.com/)
+
+
