@@ -9,7 +9,7 @@ A cookiecutter template for creating standardized machine learning projects with
 - [Usage](#usage)
 - [Project Setup](#project-setup)
 - [Pre-commit Hooks](#pre-commit-hooks)
-- [Push to your GitHub Repository](#push-your-local-repository-to-gitgub)
+- [Push to your GitHub Repository](#push-your-local-repository-to-github)
 - [Additional Resources](#additional-resources)
 
 
