@@ -131,12 +131,8 @@ After generating your project:
    cd your-project-name
    ```
 
-3. **Install dependencies using Poetry:**
-   ```bash
-   poetry install
-   ```
-
-   For more information on using Poetry, see [README_poetry.md](README_poetry.md).
+3. **Install dependencies using UV:**
+   For more information on using `UV`, see [README_uv.md](README_uv.md).
 
 4. **Set up pre-commit hooks** (see [Pre-commit Hooks](#pre-commit-hooks) below)
 
@@ -150,9 +146,9 @@ This template includes pre-configured pre-commit hooks for code quality and cons
    ```bash
    pip install pre-commit
    ```
-   Or if using Poetry:
+   Or if using uv:
    ```bash
-   poetry add pre-commit --group dev
+   uv add pre-commit --group dev
    ```
 
 2. **Install the hooks:**
@@ -188,5 +184,5 @@ To add these pre-commit hooks to an existing project:
 ## Additional Resources
 
 - [Cookiecutter Documentation](https://cookiecutter.readthedocs.io/)
-- [Poetry Documentation](https://python-poetry.org/docs/)
+- [uv Documentation](https://docs.astral.sh/uv/getting-started/)
 - [Pre-commit Documentation](https://pre-commit.com/)
