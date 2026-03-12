@@ -27,6 +27,7 @@ This project is a machine learning pipeline template designed for production-rea
 
 ```
 {{cookiecutter.project_slug}}/
+├── .venv/                             # The virtual environment folder
 ├── .github/workflows/
 │   └── pylint-precommit-pytest.yaml   # GitHub Actions CI/CD workflows
 ├── data/                              # Data files for exploration
@@ -42,6 +43,7 @@ This project is a machine learning pipeline template designed for production-rea
 ├── test/
 │   ├── conftest.py                    # Pytest configuration and fixtures
 │   └── test_one.py                    # Example test cases
+├── .env                               # Environment variables file (.gitignored)
 ├── .env.example                       # Environment variables template
 ├── .gitignore                         # Git ignore rules
 ├── .pre-commit-config.yaml            # Pre-commit hooks configuration
