@@ -35,4 +35,9 @@ Thumbs.db
 #######################
 .venv
 
+# GitHub CICD files #
+#####################
+.github/workflows/
+.mypy_cache/
+
 
