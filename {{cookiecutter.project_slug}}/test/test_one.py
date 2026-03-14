@@ -40,8 +40,8 @@ def test_sample_data_fixture_values(sample_data):
     assert sample_data["target"].sum() == 2
     assert sample_data["feature_a"].mean() == 3
     assert sample_data["target"].mean() == 0.4
-    assert sample_data["feature_a"].std() == 1.4142135623730951
-    assert sample_data["target"].std() == 0.4472135954999579
+    assert sample_data["feature_a"].std() == 1.5811388300841898
+    assert sample_data["target"].std() == 0.5477225575051662
     assert sample_data["feature_a"].min() == 1
     assert sample_data["target"].min() == 0
     assert sample_data["feature_a"].max() == 5
