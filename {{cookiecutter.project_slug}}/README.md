@@ -77,7 +77,7 @@ uv lock
 uv sync
 ```
 
-This will install all project dependencies including development tools.
+This will install all project dependencies including development tools plus it will create your virtual envirnment `.venv` file.
 
 ### 3. Activate the Virtual Environment
 
