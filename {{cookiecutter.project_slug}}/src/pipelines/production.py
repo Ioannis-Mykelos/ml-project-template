@@ -1,26 +1,56 @@
-import argparse
-import datetime as dt
+""""This is the production pipeline. It should be used to run the model in production. It should be as simple as possible and only contain the necessary steps to run the model in production. The pipeline should be run on a regular basis (e.g. daily, weekly, monthly) to generate predictions for the next period."""
 
+import os
+
+import mlflow
+import pandas as pd
 from preprocessing import preprocessing_pipeline
 from scoring import scoring_pipeline
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser()
-    """If the data for your project is avaiable in the datalake please input it in the project_config.
-    For the each FileDataset type you have you will need to add an argument with the same name as
-    the name of the dataset. So if the name of the dataset is input_data, the argument below would work."""
-    # parser.add_argument("--input_data", type=str, help="input datapath argument")
-    parser.add_argument("--output_data", type=str, help="output datapath argument")
-    parser.add_argument(
-        "--outfile_format_string",
-        type=str,
-        help="format of file containing predictions",
-    )
-    args = parser.parse_args()
-    # The arguments can now be used as args.output_data etc
-    date = dt.datetime.now().strftime("%Y-%m-%d")
-    output_file_name = args.outfile_format_string.format(date=date)
+    with mlflow.start_run():
+        print("Loading Data ...")
+        file_path = os.getenv("DATA_PATH")
+        if file_path is None:
+            raise ValueError("DATA_PATH environment variable is not set")
+        the_data = (
+            pd.read_parquet(path=file_path)
+            if ".parquet" in file_path
+            else pd.read_csv(filepath_or_buffer=file_path, engine="python")
+        )
+        print("Data loaded ✓")
 
-    """ Please use the output_file_name as the name for your output. It's composed out of the
-    project name (from project_config.json) + the date the pipeline is run """
+        # Log input data metrics
+        input_schema_info = {
+            "shape": list(the_data.shape),
+            "columns": list(the_data.columns),
+            "dtypes": the_data.dtypes.astype(str).to_dict(),
+        }
+        mlflow.log_dict(input_schema_info, "input_dataframe_info.json")
+
+        # Run the preprocessing pipeline
+        print("Preprocessing ...")
+        processed = preprocessing_pipeline(dataframe=the_data)
+        print("Preprocessing completed ✓")
+
+        # Log output data metrics
+        output_schema_info = {
+            "shape": list(processed.shape),
+            "columns": list(processed.columns),
+            "dtypes": processed.dtypes.astype(str).to_dict(),
+        }
+        mlflow.log_dict(output_schema_info, "preprocessed_dataframe_info.json")
+
+        # Run the scoring pipeline
+        print("Scoring ...")
+        scored = scoring_pipeline(data=processed)
+        print("Scoring completed ✓")
+
+        # Log output data metrics
+        scored_schema_info = {
+            "shape": list(scored.shape),
+            "columns": list(scored.columns),
+            "dtypes": scored.dtypes.astype(str).to_dict(),
+        }
+        mlflow.log_dict(scored_schema_info, "scored_dataframe_info.json")
