@@ -1,75 +1,78 @@
-"""monitoring pipeline"""
+"""Monitoring pipeline template for ML projects"""
 
-import argparse
 import os
+from typing import Protocol, Tuple
 
-import numpy as np
+import mlflow
+import mlflow.pyfunc
 import pandas as pd
-from azureml.core import Run
 from scoring import scoring_pipeline
 
 
-def monitoring_pipeline(data: pd.DataFrame, model, scoring_pipeline=scoring_pipeline):
+class ScoringPipeline(Protocol):
+    def __call__(
+        self,
+        dataframe: pd.DataFrame,
+        model: mlflow.pyfunc.PyFuncModel,
+    ) -> pd.DataFrame:
+        pass
+
+
+def monitoring_pipeline(
+    dataframe: pd.DataFrame,
+    model: mlflow.pyfunc.PyFuncModel,
+    pipeline: ScoringPipeline,
+) -> Tuple[pd.DataFrame, mlflow.pyfunc.PyFuncModel, pd.DataFrame]:
     """
-    Monitoring pipeline
+    Monitoring pipeline template for ML projects.
 
     Arguments:
     ----------
-    - data    : Input data to be cleaned
+    - dataframe (pd.DataFrame)              : Input data to be processed
+    - model     (mlflow.pyfunc.PyFuncModel) : Trained model for scoring
+    - pipeline (ScoringPipeline)            : Scoring pipeline function to be applied on the data
 
     Returns:
     -------
-    - data  : The processed music data.
+    - dataframe (pd.DataFrame)              : The processed data.
+    - model     (mlflow.pyfunc.PyFuncModel) : The model used for scoring.
+    - pipeline (pd.DataFrame)               : The output of the scoring pipeline.
     """
-    data_ = data.copy()
-    new_model = model
-    pipe = scoring_pipeline
-    return data_, new_model, pipe
-
-
-def parse_args():
-    """parse the arguments passed to the script."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input_data", type=str, help="input datapath argument")
-    parser.add_argument("--input_model", type=str, help="input datapath argument")
-    parser.add_argument("--output_data", type=str, help="output datapath argument")
-    parser.add_argument(
-        "--filename", type=str, help="Filename to be processed", default="default_data"
-    )
-    args = parser.parse_args()
-    return args
+    data = dataframe.copy()
+    pipe = pipeline(dataframe=data, model=model)
+    return data, model, pipe
 
 
 if __name__ == "__main__":
-    # Parse args and get the parameters
-    the_args = parse_args()
-    run = Run.get_context()
 
-    print("Loading Data ...")
-    file_path = os.path.join(the_args.input_data, the_args.filename)
-    the_data = pd.read_csv(file_path, engine="python")
-    print("Data loaded ✓")
+    with mlflow.start_run(run_name="monitoring_run"):
+        print("Loading Data ...")
+        file_path = os.getenv("MONITORING_DATA_PATH")
+        if file_path is None:
+            raise ValueError("MONITORING_DATA_PATH environment variable is not set")
+        the_data = (
+            pd.read_parquet(path=file_path)
+            if file_path.endswith(".parquet")
+            else pd.read_csv(filepath_or_buffer=file_path, engine="python")
+        )
+        print("Data loaded ✓")
 
-    print("Loading Model ...")
-    file_path = os.path.join(the_args.input_model)
-    the_model = "model"
-    print("Data loaded ✓")
+        print("Loading Model ...")
+        the_model = mlflow.pyfunc.load_model("models:/churn_model/Production")
+        print("Model loaded ✓")
 
-    print("Monitoring ...")
-    pre_processed = monitoring_pipeline(
-        data=the_data, model=the_model, scoring_pipeline=scoring_pipeline
-    )
-    print("Monitoring ✓")
+        print("Monitoring ...")
+        data, model, pipe = monitoring_pipeline(
+            dataframe=the_data, model=the_model, pipeline=scoring_pipeline
+        )
+        print("Monitoring ✓")
 
-    # Path
-    print("Saving data ...")
-    FILE_PRED = (
-        f"{the_args.filename.replace('.csv', '').replace('.parquet', '')}.parquet"
-    )
-    path = the_args.output_data
-    os.makedirs(path, exist_ok=True)
-    pre_processed.to_parquet(path=os.path.join(path, FILE_PRED))
-    print("Data saved ✓")
+        # Log basic info about the run
+        mlflow.log_param("data_path", file_path)
+        mlflow.log_param("data_shape", str(the_data.shape))
+        mlflow.log_metric("row_count", len(the_data))
 
-    # End run
-    run.complete()
+        # If pipe is a DataFrame with predictions, log summary stats
+        if isinstance(pipe, pd.DataFrame):
+            mlflow.log_metric("prediction_count", len(pipe))
+            mlflow.log_artifact(pipe.to_csv(index=False), "predictions.csv")
