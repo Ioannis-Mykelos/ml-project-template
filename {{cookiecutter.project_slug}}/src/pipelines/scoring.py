@@ -1,65 +1,66 @@
-"""scoring pipeline"""
+"""Scoring pipeline template — compatible with Azure ML and Databricks."""
 
-import argparse
 import os
 
-import numpy as np
+import mlflow.pyfunc
 import pandas as pd
-from azureml.core import Run
 
 
-def scoring_pipeline(data: pd.DataFrame) -> pd.DataFrame:
-    """"""
+def scoring_pipeline(
+    dataframe: pd.DataFrame, model: mlflow.pyfunc.PyFuncModel
+) -> pd.DataFrame:
     """
-    scores can mean anything from predictions, probabilities etc - pipeline
+    Scoring pipeline template compatible with Azure ML and Databricks.
 
     Arguments:
     ----------
-    - data    : Input data to be cleaned
+    - dataframe (pd.DataFrame) : Input data to be scored
+    - model (mlflow.pyfunc.PyFuncModel) : Trained ML model for scoring
 
     Returns:
     -------
-    - data  : The processed music data.
+    - data (pd.DataFrame)      : The scored data.
     """
-    data_ = data.copy()
-    return data_
+    data = dataframe.copy()
 
+    # Make predictions
+    predictions = model.predict(data)
 
-def parse_args():
-    """parse the arguments passed to the script."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input_data", type=str, help="input datapath argument")
-    parser.add_argument("--output_data", type=str, help="output datapath argument")
-    parser.add_argument(
-        "--filename", type=str, help="Filename to be processed", default="default_data"
-    )
-    args = parser.parse_args()
-    return args
+    return pd.DataFrame(predictions, columns=["prediction"])
 
 
 if __name__ == "__main__":
-    # Parse args and get the parameters
-    the_args = parse_args()
-    run = Run.get_context()
 
-    print("Loading Data ...")
-    file_path = os.path.join(the_args.input_data, the_args.filename)
-    the_data = pd.read_csv(file_path, engine="python")
-    print("Data loaded ✓")
+    with mlflow.start_run(run_name="scoring_run", nested=True):
+        print("Loading Data ...")
+        file_path = os.getenv("SCORING_DATA_PATH")
+        if file_path is None:
+            raise ValueError("SCORING_DATA_PATH environment variable is not set")
+        the_data = (
+            pd.read_parquet(path=file_path)
+            if file_path.endswith(".parquet")
+            else pd.read_csv(filepath_or_buffer=file_path, engine="python")
+        )
+        print("Data loaded ✓")
 
-    print("Scoring ...")
-    pre_processed = scoring_pipeline(data=the_data)
-    print("Scoring ✓")
+        # Log input data metrics
+        input_schema_info = {
+            "shape": list(the_data.shape),
+            "columns": list(the_data.columns),
+            "dtypes": the_data.dtypes.astype(str).to_dict(),
+        }
+        mlflow.log_dict(input_schema_info, "input_dataframe_info.json")
 
-    # Path
-    print("Saving data ...")
-    FILE_PRED = (
-        f"{the_args.filename.replace('.csv', '').replace('.parquet', '')}.parquet"
-    )
-    path = the_args.output_data
-    os.makedirs(path, exist_ok=True)
-    pre_processed.to_parquet(path=os.path.join(path, FILE_PRED))
-    print("Data saved ✓")
+        # Run the scoring pipeline
+        print("Scoring ...")
+        model = mlflow.pyfunc.load_model("models:/churn_model/Production")
+        scored = scoring_pipeline(dataframe=the_data, model=model)
+        print("Scoring completed ✓")
 
-    # End run
-    run.complete()
+        # Log output data metrics
+        output_schema_info = {
+            "shape": list(scored.shape),
+            "columns": list(scored.columns),
+            "dtypes": scored.dtypes.astype(str).to_dict(),
+        }
+        mlflow.log_dict(output_schema_info, "output_dataframe_info.json")

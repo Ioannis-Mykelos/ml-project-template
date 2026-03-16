@@ -1,65 +1,61 @@
-"""preprocessing pipeline"""
+"""Preprocessing pipeline template — compatible with Azure ML and Databricks."""
 
-import argparse
 import os
 
-import numpy as np
+import mlflow
 import pandas as pd
-from azureml.core import Run
 
 
-def preprocessing_pipeline(data: pd.DataFrame) -> pd.DataFrame:
+def preprocessing_pipeline(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
-    Pre-processing pipeline
+    Preprocessing pipeline template compatible with Azure ML and Databricks.
 
     Arguments:
     ----------
-    - df    : Input data to be cleaned
+    - dataframe (pd.DataFrame) : Input data to be cleaned
 
     Returns:
     -------
-    - data  : The processed music data.
+    - data (pd.DataFrame)      : The processed music data.
     """
-    data_ = data.copy()
+    data = dataframe.copy()
 
-    return data_
+    # TODO: Add your processing logic here
 
-
-def parse_args():
-    """parse the arguments passed to the script."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input_data", type=str, help="input datapath argument")
-    parser.add_argument("--output_data", type=str, help="output datapath argument")
-    parser.add_argument(
-        "--filename", type=str, help="Filename to be processed", default="default_data"
-    )
-    args = parser.parse_args()
-    return args
+    return data
 
 
 if __name__ == "__main__":
-    # Parse args and get the parameters
-    the_args = parse_args()
-    run = Run.get_context()
 
-    print("Loading Data ...")
-    file_path = os.path.join(the_args.input_data, the_args.filename)
-    the_data = pd.read_csv(file_path, engine="python")
-    print("Data loaded ✓")
+    with mlflow.start_run():
+        print("Loading Data ...")
+        file_path = os.getenv("DATA_PATH")
+        if file_path is None:
+            raise ValueError("DATA_PATH environment variable is not set")
+        the_data = (
+            pd.read_parquet(path=file_path)
+            if ".parquet" in file_path
+            else pd.read_csv(filepath_or_buffer=file_path, engine="python")
+        )
+        print("Data loaded ✓")
 
-    print("Pre-processing ...")
-    pre_processed = preprocessing_pipeline(data=the_data)
-    print("Pre-processing ✓")
+        # Log input data metrics
+        input_schema_info = {
+            "shape": list(the_data.shape),
+            "columns": list(the_data.columns),
+            "dtypes": the_data.dtypes.astype(str).to_dict(),
+        }
+        mlflow.log_dict(input_schema_info, "input_dataframe_info.json")
 
-    # Path
-    print("Saving data ...")
-    FILE_PRED = (
-        f"{the_args.filename.replace('.csv', '').replace('.parquet', '')}.parquet"
-    )
-    path = the_args.output_data
-    os.makedirs(path, exist_ok=True)
-    pre_processed.to_parquet(path=os.path.join(path, FILE_PRED))
-    print("Data saved ✓")
+        # Run the preprocessing pipeline
+        print("Preprocessing ...")
+        processed = preprocessing_pipeline(dataframe=the_data)
+        print("Preprocessing completed ✓")
 
-    # End run
-    run.complete()
+        # Log output data metrics
+        output_schema_info = {
+            "shape": list(processed.shape),
+            "columns": list(processed.columns),
+            "dtypes": processed.dtypes.astype(str).to_dict(),
+        }
+        mlflow.log_dict(output_schema_info, "output_dataframe_info.json")
