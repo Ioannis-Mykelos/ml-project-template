@@ -189,9 +189,9 @@ if __name__ == "__main__":
         mlflow.log_params(XGB_PARAMS)
 
         # Load data
-        file_path = os.getenv("DATA_PATH")
+        file_path = os.getenv("DATA_PATH_TRAINING")
         if file_path is None:
-            raise ValueError("DATA_PATH environment variable is not set")
+            raise ValueError("DATA_PATH_TRAINING environment variable is not set")
         the_data = (
             pd.read_parquet(file_path)
             if file_path.endswith(".parquet")
