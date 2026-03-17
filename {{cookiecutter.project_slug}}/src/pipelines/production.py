@@ -4,8 +4,11 @@ import os
 
 import mlflow
 import pandas as pd
+from dotenv import load_dotenv
 from preprocessing import preprocessing_pipeline
 from scoring import scoring_pipeline
+
+load_dotenv()
 
 if __name__ == "__main__":
 
