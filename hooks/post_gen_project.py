@@ -45,15 +45,15 @@ def create_jupyter_kernel(project_slug):
         f"uv run python -m ipykernel install "
         f"--user "
         f"--name {project_slug} "
-        f"--display-name 'Python ({project_slug})'"
+        f"--display-name '({project_slug})-env'"
     )
 
     if run_command(kernel_cmd, check=False) is not None:
-        print(f"  ✅ Jupyter kernel 'Python ({project_slug})' created successfully!")
+        print(f"  ✅ Jupyter kernel '({project_slug})-env' created successfully!")
     else:
         print("  ⚠️  Kernel creation failed. Run manually:")
         print(
-            f"      uv run python -m ipykernel install --user --name {project_slug} --display-name 'Python ({project_slug})'"
+            f"      uv run python -m ipykernel install --user --name {project_slug} --display-name '({project_slug})-env'"
         )
 
 
