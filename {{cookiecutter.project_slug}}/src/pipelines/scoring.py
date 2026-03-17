@@ -33,9 +33,9 @@ if __name__ == "__main__":
 
     with mlflow.start_run(run_name="scoring_run", nested=True):
         print("Loading Data ...")
-        file_path = os.getenv("SCORING_DATA_PATH")
+        file_path = os.getenv("DATA_PATH_SCORING")
         if file_path is None:
-            raise ValueError("SCORING_DATA_PATH environment variable is not set")
+            raise ValueError("DATA_PATH_SCORING environment variable is not set")
         the_data = (
             pd.read_parquet(path=file_path)
             if file_path.endswith(".parquet")

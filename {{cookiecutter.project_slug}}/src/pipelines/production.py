@@ -11,9 +11,9 @@ if __name__ == "__main__":
 
     with mlflow.start_run():
         print("Loading Data ...")
-        file_path = os.getenv("DATA_PATH")
+        file_path = os.getenv("DATA_PATH_PRODUCTION")
         if file_path is None:
-            raise ValueError("DATA_PATH environment variable is not set")
+            raise ValueError("DATA_PATH_PRODUCTION environment variable is not set")
         the_data = (
             pd.read_parquet(path=file_path)
             if ".parquet" in file_path
