@@ -31,6 +31,32 @@ def get_github_username(fallback):
     return fallback
 
 
+def create_jupyter_kernel(project_slug):
+    """Create a Jupyter kernel from the uv virtual environment."""
+    print("\n📓 Setting up Jupyter kernel...")
+
+    # Ensure ipykernel is installed in the venv
+    if run_command("uv run python -m ipykernel --version", check=False) is None:
+        print("  Installing ipykernel...")
+        run_command("uv add ipykernel")
+
+    # Register the kernel using the project slug as the kernel name
+    kernel_cmd = (
+        f"uv run python -m ipykernel install "
+        f"--user "
+        f"--name {project_slug} "
+        f"--display-name 'Python ({project_slug})'"
+    )
+
+    if run_command(kernel_cmd, check=False) is not None:
+        print(f"  ✅ Jupyter kernel 'Python ({project_slug})' created successfully!")
+    else:
+        print("  ⚠️  Kernel creation failed. Run manually:")
+        print(
+            f"      uv run python -m ipykernel install --user --name {project_slug} --display-name 'Python ({project_slug})'"
+        )
+
+
 def main():
     project_dir = Path.cwd()
 
@@ -73,6 +99,9 @@ def main():
         print("✅ Successfully pushed to GitHub!")
     else:
         print("⚠️  Push failed. Check if the repo exists and your SSH keys are set.")
+
+    # 5. Jupyter kernel
+    create_jupyter_kernel(project_slug)
 
     print(f"{'=' * 60}\n")
 
