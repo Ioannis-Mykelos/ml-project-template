@@ -4,6 +4,9 @@ import os
 
 import mlflow.pyfunc
 import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def scoring_pipeline(

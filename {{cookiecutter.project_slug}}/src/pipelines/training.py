@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import xgboost as xgb
+from dotenv import load_dotenv
 from mlflow.tracking import MlflowClient
 from sklearn.metrics import (
     accuracy_score,
@@ -21,6 +22,8 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 from sklearn.model_selection import train_test_split
+
+load_dotenv()
 
 
 def compute_confusion_matrix_image(cm: np.ndarray, class_labels: list) -> plt.Figure:

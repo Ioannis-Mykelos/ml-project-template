@@ -6,7 +6,10 @@ from typing import Protocol, Tuple
 import mlflow
 import mlflow.pyfunc
 import pandas as pd
+from dotenv import load_dotenv
 from scoring import scoring_pipeline
+
+load_dotenv()
 
 
 class ScoringPipeline(Protocol):

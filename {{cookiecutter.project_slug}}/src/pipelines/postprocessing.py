@@ -4,6 +4,9 @@ import os
 
 import mlflow
 import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def postprocessing_pipeline(dataframe: pd.DataFrame) -> pd.DataFrame:
